@@ -1,0 +1,54 @@
+jobs:
+  - id: 1
+    name: google.com
+    description: Monitors google.com HTTP response code
+    type: http
+    frequency: 10
+    endpoint: https://www.google.com
+    allowedHttpStatuses:
+      - 200
+    timeout: 5
+  - id: 2
+    name: Teapot
+    description: Checks if server is a teapot or responds with a redirect (hoping to get to an actual teapot)
+    type: http
+    frequency: 10
+    endpoint: https://httpstat.us/random/418,307,308
+    allowedHttpStatuses:
+      - 418
+      - [307, 308]
+    timeout: 5
+  - id: 3
+    name: ICMP
+    description: Pings 8.8.8.8
+    type: ping
+    frequency: 10
+    version: ipv4
+    endpoint: 8.8.8.8
+    timeout: 5
+  - id: 4
+    name: Do we have a WTF
+    description: Checks if the daily wtf actually contains a wtf
+    type: keyword
+    frequency: 10
+    endpoint: https://thedailywtf.com/
+    keywords:
+      - wtf
+    timeout: 5
+  - id: 5
+    name: Scripted monitor
+    description: Runs a scripted monitor. Checks if we get 3 2xx http statuses in a row
+    type: script
+    frequency: 20
+    script: |-
+      const check = async ({ fetch, result }) => {
+        for (let i = 0; i < 3; i++) {
+          const resp = await fetch('https://httpstat.us/random/200-206,400,404');
+          if (resp.status < 200 || resp.status > 299) {
+            result.fail('Got a non-2xx status: ' + resp.status.toString());
+          }
+        }
+
+        return result.ok();
+      }
+    timeout: 30
