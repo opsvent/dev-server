@@ -1,3 +1,4 @@
+generation: 1
 jobs:
   - id: 1
     name: google.com
@@ -45,7 +46,7 @@ jobs:
         for (let i = 0; i < 3; i++) {
           const resp = await fetch('https://httpstat.us/random/200-206,400,404');
           if (resp.status < 200 || resp.status > 299) {
-            result.fail('Got a non-2xx status: ' + resp.status.toString());
+            return result.fail('Got a non-2xx status: ' + resp.status.toString());
           }
         }
 

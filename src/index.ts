@@ -1,6 +1,7 @@
 import Winston from 'winston';
 
-import Config from './Config';
+import Api from './api';
+import Config from './config';
 import Db from './db';
 import loadJobDefs from './loadJobDefs';
 
@@ -33,6 +34,7 @@ const logger = Winston.createLogger({
 
 const config = new Config();
 const db = new Db(config.server.databaseFile, logger.child({ group: 'db' }));
+const api = new Api(config.api, logger.child({ group: 'api' }), db);
 
 const main = async () => {
 	logger.info('OpsVent Dev-Server starting up', {
@@ -52,10 +54,13 @@ const main = async () => {
 	if (!jobDefs) {
 		return;
 	}
-	logger.info('Finished loading job definitions', { count: jobDefs.length });
+	logger.info('Finished loading job definitions', {
+		count: jobDefs.jobs.length
+	});
 
 	try {
 		await db.connect();
+		await api.start(jobDefs);
 	} catch (e) {
 		logger.error('Error during startup', { error: e });
 		exit();
@@ -66,6 +71,7 @@ const main = async () => {
 const exit = async () => {
 	logger.info('Shutting down');
 	await db.close().catch(() => {});
+	await api.close().catch(() => {});
 	logger.info('Bye!');
 	process.exit();
 };

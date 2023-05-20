@@ -13,7 +13,7 @@ const loadJobDefs = async (file: string) => {
 
 	const data = validator.verify(parsed);
 
-	return data.jobs;
+	return data;
 };
 
 export default loadJobDefs;

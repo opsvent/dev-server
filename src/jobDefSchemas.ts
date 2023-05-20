@@ -50,6 +50,7 @@ export const ScriptJobSchema = Type.Object({
 export type ScriptJobType = Static<typeof ScriptJobSchema>;
 
 export const JobDefSchema = Type.Object({
+	generation: Type.Number({ minimum: 1 }),
 	jobs: Type.Array(
 		Type.Union([
 			HTTPJobSchema,
