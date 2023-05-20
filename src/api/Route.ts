@@ -8,7 +8,7 @@ export interface RouteCtx {
 	db: Db;
 	logger: Winston.Logger;
 	jobsDef: JobDefType;
-	secret: Buffer;
+	secret: string;
 }
 
 type Route = FastifyPluginAsync<RouteCtx>;

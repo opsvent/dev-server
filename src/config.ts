@@ -9,7 +9,7 @@ export interface ServerConfig {
 
 export interface ApiConfig {
 	readonly port: number;
-	readonly secret: Buffer;
+	readonly secret: string;
 }
 
 class Config {
@@ -26,10 +26,7 @@ class Config {
 
 		this._api = {
 			port: env.get('OVDS_PORT').default(9000).asPortNumber(),
-			secret: Buffer.from(
-				env.get('OVDS_SECRET').required().asString(),
-				'base64'
-			)
+			secret: env.get('OVDS_SECRET').required().asString()
 		};
 	}
 

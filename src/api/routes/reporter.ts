@@ -1,24 +1,62 @@
+import hmac from '@opsvent/hmac';
 import { Type, Static } from '@sinclair/typebox';
+import { FastifyRequest } from 'fastify';
+import { BadRequest, Unauthorized } from 'http-errors';
 import _ from 'lodash';
 
 import { MonitorLog } from '../../models';
+import NonceValidator from '../../nonceValidator';
 import { MonitorStatus } from '../../types';
 import Route from '../Route';
 
 const ReportBodySchema = Type.Object({
+	generation: Type.Number(),
 	monitor: Type.Number(),
 	ok: Type.Boolean(),
 	message: Type.Optional(Type.String())
 });
 
 const ReporterRoute: Route = async (fastify, ctx) => {
-	fastify.get('/reporter/generation', () => {
+	const nonceValidator = new NonceValidator(600); // 10 minute window
+
+	const checkAuth = (req: FastifyRequest) => {
+		try {
+			const sig = req.headers.authorization;
+			if (!sig) {
+				throw new Error('Authorization header missing');
+			}
+
+			const nonce = hmac.verify(
+				sig,
+				{
+					method: req.method,
+					url: req.routerPath,
+					body: req.rawBody?.toString() || '',
+					timeWindow: 600
+				},
+				{
+					id: 'DEV_KID',
+					key: ctx.secret
+				}
+			);
+
+			nonceValidator.validate(nonce);
+		} catch (e) {
+			throw new Unauthorized((e as any)?.message || undefined);
+		}
+	};
+
+	fastify.get('/reporter/generation', req => {
+		checkAuth(req);
+
 		return {
 			generation: ctx.jobsDef.generation
 		};
 	});
 
-	fastify.get('/reporter/definitions', () => {
+	fastify.get('/reporter/definitions', req => {
+		checkAuth(req);
+
 		return {
 			generation: ctx.jobsDef.generation,
 			definitions: ctx.jobsDef.jobs.map(jobDef =>
@@ -47,6 +85,12 @@ const ReporterRoute: Route = async (fastify, ctx) => {
 		'/reporter/report',
 		{ schema: { body: ReportBodySchema } },
 		async req => {
+			checkAuth(req);
+
+			if (req.body.generation !== ctx.jobsDef.generation) {
+				throw new BadRequest('Invalid generation');
+			}
+
 			const reported = req.body.ok
 				? MonitorStatus.UP
 				: MonitorStatus.DOWN;

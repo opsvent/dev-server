@@ -1,4 +1,5 @@
 import Fastify from 'fastify';
+import FastifyRawBody from 'fastify-raw-body';
 import Winston from 'winston';
 
 import { ApiConfig } from '../config';
@@ -21,6 +22,7 @@ class Api {
 		this.logger.info('Initializing API');
 
 		this.fastify = Fastify();
+		this.fastify.register(FastifyRawBody);
 	}
 
 	public async start(jobsDef: JobDefType) {
