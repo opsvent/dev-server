@@ -61,9 +61,9 @@ const ReporterRoute: Route = async (fastify, ctx) => {
 				log.monitorId = req.body.monitor;
 				log.timestamp = new Date();
 				log.fromStatus =
-					monitorStatus.get(req.body.monitor) || MonitorStatus.DOWN;
+					monitorStatus.get(req.body.monitor) ?? MonitorStatus.DOWN;
 				log.toStatus = reported;
-				log.description = req.body.message || '';
+				log.description = req.body.message ?? '';
 
 				await ctx.db.conn.getRepository(MonitorLog).save(log);
 				monitorStatus.set(req.body.monitor, reported);
