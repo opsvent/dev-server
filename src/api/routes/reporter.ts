@@ -42,11 +42,15 @@ const ReporterRoute: Route = async (fastify, ctx) => {
 
 			nonceValidator.validate(nonce);
 		} catch (e) {
+			ctx.logger.info('Unauthorized request', {
+				reason: (e as any)?.message
+			});
 			throw new Unauthorized((e as any)?.message || undefined);
 		}
 	};
 
 	fastify.get('/reporter/generation', req => {
+		ctx.logger.info('Request to /reporter/generation');
 		checkAuth(req);
 
 		return {
@@ -55,6 +59,7 @@ const ReporterRoute: Route = async (fastify, ctx) => {
 	});
 
 	fastify.get('/reporter/definitions', req => {
+		ctx.logger.info('Request to /reporter/definitions');
 		checkAuth(req);
 
 		return {
@@ -85,6 +90,7 @@ const ReporterRoute: Route = async (fastify, ctx) => {
 		'/reporter/report',
 		{ schema: { body: ReportBodySchema } },
 		async req => {
+			ctx.logger.info('Request to /reporter/report');
 			checkAuth(req);
 
 			if (req.body.generation !== ctx.jobsDef.generation) {
