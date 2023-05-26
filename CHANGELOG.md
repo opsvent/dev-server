@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.2](https://github.com/opsvent/dev-server/compare/v0.1.1...v0.1.2) (2023-05-26)
+
+
+### Features
+
+* Implemented HMAC authorization ([8d3ce84](https://github.com/opsvent/dev-server/commit/8d3ce8426fdcecc08cdbbc431a5f59fc01318635))
+
+
+### Improvements
+
+* Added logging for requests ([a5cd1f8](https://github.com/opsvent/dev-server/commit/a5cd1f8c550e03e624cabc82d5c0dcf7aa9006fc))
+
 ### 0.1.1 (2023-05-20)
 
 
