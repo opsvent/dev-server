@@ -42,11 +42,11 @@ jobs:
     type: script
     frequency: 20
     script: |-
-      const check = async ({ fetch, result }) => {
+      async function check () {
         for (let i = 0; i < 3; i++) {
-          const resp = await fetch('https://httpstat.us/random/200-206,400,404');
-          if (resp.status < 200 || resp.status > 299) {
-            return result.fail('Got a non-2xx status: ' + resp.status.toString());
+          const resp = await request('https://httpstat.us/random/200-206,400,401,402,404', {throwHttpErrors: false});
+          if (resp.statusCode < 200 || resp.statusCode > 299) {
+            return result.fail('Got a non-2xx status in my script: ' + resp.statusCode.toString());
           }
         }
 
