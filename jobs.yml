@@ -53,3 +53,11 @@ jobs:
         return result.ok();
       }
     timeout: 30
+  - id: 6
+    name: A monitor that always fails
+    type: http
+    frequency: 10
+    endpoint: https://httpstat.us/400
+    allowedHttpStatuses:
+      - 200
+    timeout: 5

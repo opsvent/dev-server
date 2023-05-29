@@ -1,0 +1,213 @@
+<%
+function getCellColor(uptime) {
+	const stops = [1, 0.98, 0.95, 0.9, 0.8, 0.5, 0.1, 0]
+
+	for (const stop of stops) {
+		if (uptime >= stop) {
+			return `p${stop*100}`;
+		}
+	}
+
+	return '';
+}
+%>
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Opsvent Development Server Dashboard</title>
+		<meta charset="utf-8">
+		<link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+		<style>
+			:root {
+				--main: #272b30;
+				--light: #878b90;
+				--medium: #a4a9b0;
+				--ok: #93D976;
+				--err: #DD4949;
+			}
+
+			* {
+				box-sizing: border-box;
+				font-family: 'Roboto', sans-serif;
+			}
+			body {
+				margin: 0;
+				background: var(--main);
+			}
+			p, h1, h2, h3 {
+				margin: 0;
+				color: var(--light);
+			}
+			p, h3 {
+				color: black;
+			}
+			p {
+				font-size: 14px;
+			}
+
+			.header {
+				background: var(--light);
+				display: flex;
+				padding: 16px 32px;
+				margin-bottom: 32px;
+			}
+
+			h1 {
+				font-size: 24px;
+				color: #FFFFFF;
+				font-weight: normal;
+			}
+
+			h2 {
+				font-size: 22px;
+				letter-spacing: 0.7px;
+				margin-bottom: 16px;
+				font-weight: normal;
+			}
+
+			h3 {
+				font-size: 16px;
+				font-weight: normal;
+			}
+
+			.content {
+				padding: 16px;
+			}
+
+			.monitors {
+				display: grid;
+				grid-template-columns: 1fr 1fr;
+				column-gap: 16px;
+				row-gap: 16px;
+			}
+
+			.monitor {
+				background: var(--medium);
+				border-radius: 4px;
+				padding: 16px;
+			}
+			.monitor .title {
+				display: flex;
+				align-items: center;
+				margin-bottom: 8px;
+				padding-bottom: 8px;
+				border-bottom: 1px solid var(--light);
+			}
+			.monitor .title h3 {
+				flex-grow: 1;
+			}
+			.monitor p {
+				margin-bottom: 4px;
+			}
+			.monitor .tag {
+				font-size: 14px;
+				letter-spacing: 1px;
+				padding: 4px 8px;
+				border-radius: 3px;
+				background: var(--light);
+				color: var(--main);
+				margin-left: 4px;
+			}
+			.monitor .status {
+				width: 20px;
+				height: 20px;
+				margin-right: 14px;
+				border-radius: 10px;
+			}
+			.monitor .status.up {
+				background: var(--ok);
+			}
+			.monitor .status.down {
+				background: var(--err);
+			}
+			.fail {
+				color: var(--err);
+				font-weight: bold;
+			}
+			.label {
+				font-size: 12px;
+			}
+			.history {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				margin-bottom: 8px;
+			}
+			.history .cell {
+				height: 24px;
+				flex-grow: 1;
+				margin: 0 2px;
+				width: 4px;
+				border-radius: 2px;
+				background: var(--light);
+			}
+			.cell:hover {
+				filter: brightness(80%);
+			}
+			.cell.p100 {
+				background: var(--ok);
+			}
+			.cell.p98 {
+				background: #b1d4a3;
+			}
+			.cell.p95 {
+				background: #cdd964;
+			}
+			.cell.p90 {
+				background: #f2d80f;
+			}
+			.cell.p80 {
+				background: #f2900f;
+			}
+			.cell.p50 {
+				background: #fa6e37;
+			}
+			.cell.p10 {
+				background: #f2530f;
+			}
+			.cell.p0 {
+				background: var(--err)
+			}
+		</style>
+	</head>
+	<body>
+		<div class="header">
+			<h1>
+				Opsvent Development Server Dashboard
+			</h1>
+		</div>
+		<div class="content">
+			<h2>Monitors</h2>
+			<div class="monitors">
+				<% for (const monitor of monitors) { %>
+					<div class="monitor">
+						<div class="title">
+							<div class="status <%= monitor.up ? "up" : "down" %>"></div>
+							<h3><%= monitor.name %></h3>
+							<div class="tag">&#x1F551; <%= monitor.frequency %>s</div>
+							<div class="tag"><%= monitor.type %></div>
+						</div>
+						<p class="label">Last 24 hours</p>
+						<div class="history">
+							<% for (const p of monitor.last24Hours) { %>
+								<div class="cell <%= getCellColor(p.uptime) %>" title="<%= p.label %>"></div>
+							<% } %>
+						</div>
+						<p class="label">Last 60 days</p>
+						<div class="history">
+							<% for (const p of monitor.last60Days) { %>
+								<div class="cell <%= getCellColor(p.uptime) %>" title="<%= p.label %>"></div>
+							<% } %>
+						</div>
+						<br/>
+						<p><%= monitor.description %></p>
+						<% if(!monitor.up) { %>
+							<p><span class="fail">Error:</span> <%= monitor.current?.description || 'unknown' %></p>
+						<% } %>
+					</div>
+				<% } %>
+			</div>
+		</div>
+	</body>
+</html>

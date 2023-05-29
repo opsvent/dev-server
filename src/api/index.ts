@@ -1,3 +1,5 @@
+import FastifyView from '@fastify/view';
+import Ejs from 'ejs';
 import Fastify from 'fastify';
 import FastifyRawBody from 'fastify-raw-body';
 import Winston from 'winston';
@@ -23,6 +25,11 @@ class Api {
 
 		this.fastify = Fastify();
 		this.fastify.register(FastifyRawBody);
+		this.fastify.register(FastifyView, {
+			engine: {
+				ejs: Ejs
+			}
+		});
 	}
 
 	public async start(jobsDef: JobDefType) {
