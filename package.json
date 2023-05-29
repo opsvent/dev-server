@@ -1,6 +1,6 @@
 {
   "name": "@opsvent/dev-server",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "private": true,
   "description": "An example server implementation that can be used to communicate with the reporter",
   "main": "dist/index.js",

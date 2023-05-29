@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [0.1.3](https://github.com/opsvent/dev-server/compare/v0.1.2...v0.1.3) (2023-05-29)
+
+
+### Features
+
+* **dashboard:** Implemented dashboard ([f348adc](https://github.com/opsvent/dev-server/commit/f348adcccb4b24c7e509bb610863813174df248a))
+* **dashboard:** Refresh dashboard every 10 seconds ([9c60c9a](https://github.com/opsvent/dev-server/commit/9c60c9a8e26222355f402fb80612d46658dc09e9))
+
 ### [0.1.2](https://github.com/opsvent/dev-server/compare/v0.1.1...v0.1.2) (2023-05-26)
 
 
