@@ -75,10 +75,7 @@ const DashboardRoute: Route = async (fastify, ctx) => {
 						allEvents.reduce((acc, cur) => {
 							const last = _.last(acc);
 
-							if (
-								cur.fromStatus == MonitorStatus.UP &&
-								cur.toStatus == MonitorStatus.DOWN
-							) {
+							if (cur.toStatus == MonitorStatus.DOWN) {
 								// start downtime
 								return [
 									...acc,
