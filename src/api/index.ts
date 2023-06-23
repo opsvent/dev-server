@@ -1,3 +1,6 @@
+import path from 'path';
+
+import FastifyStatic from '@fastify/static';
 import FastifyView from '@fastify/view';
 import Ejs from 'ejs';
 import Fastify from 'fastify';
@@ -29,6 +32,10 @@ class Api {
 			engine: {
 				ejs: Ejs
 			}
+		});
+		this.fastify.register(FastifyStatic, {
+			root: path.join(__dirname, 'static'),
+			prefix: '/static/'
 		});
 	}
 

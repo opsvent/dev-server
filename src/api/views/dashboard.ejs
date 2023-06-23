@@ -18,6 +18,7 @@ function getCellColor(uptime) {
 		<title>Opsvent Development Server Dashboard</title>
 		<meta charset="utf-8">
 		<link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+		<link href="/static/icon.png" rel="icon">
 		<style>
 			:root {
 				--main: #272b30;
@@ -47,10 +48,11 @@ function getCellColor(uptime) {
 			}
 
 			.header {
-				background: var(--light);
+				background: var(--medium);
 				display: flex;
 				padding: 16px 32px;
 				margin-bottom: 32px;
+				align-items: center;
 			}
 
 			h1 {
@@ -69,6 +71,11 @@ function getCellColor(uptime) {
 			h3 {
 				font-size: 16px;
 				font-weight: normal;
+			}
+
+			.logo {
+				height: 24px;
+				margin-right: 16px;
 			}
 
 			.content {
@@ -178,6 +185,7 @@ function getCellColor(uptime) {
 	</head>
 	<body>
 		<div class="header">
+			<img class="logo" src="/static/logo.png">
 			<h1>
 				Opsvent Development Server Dashboard
 			</h1>

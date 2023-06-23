@@ -48,6 +48,7 @@
     "typescript": "^5.0.4"
   },
   "dependencies": {
+    "@fastify/static": "^6.10.2",
     "@fastify/view": "^7.4.1",
     "@opsvent/hmac": "^1.0.1",
     "@sinclair/typebox": "^0.28.9",
