@@ -49,11 +49,12 @@ function getCellColor(uptime) {
 			}
 
 			.header {
-				background: var(--medium);
+				background: var(--main);
 				display: flex;
 				padding: 16px 32px;
 				margin-bottom: 32px;
 				align-items: center;
+				justify-content: space-between;
 			}
 
 			h1 {
@@ -199,10 +200,10 @@ function getCellColor(uptime) {
 	</head>
 	<body>
 		<div class="header">
-			<img class="logo" src="/static/logo.png">
 			<h1>
 				Opsvent Development Server Dashboard
 			</h1>
+			<img class="logo" src="/static/logo.png">
 		</div>
 		<div class="content">
 			<h2>Monitors</h2>
