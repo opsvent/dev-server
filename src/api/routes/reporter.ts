@@ -111,7 +111,7 @@ const ReporterRoute: Route = async (fastify, ctx) => {
 				throw new BadRequest('Invalid generation');
 			}
 
-			const cacheKey = `${req.body.monitor}:${client}`;
+			const cacheKey = `${client}:${req.body.monitor}`;
 			const reported = req.body.ok
 				? MonitorStatus.UP
 				: MonitorStatus.DOWN;
