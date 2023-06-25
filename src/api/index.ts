@@ -47,7 +47,7 @@ class Api {
 				db: this.db,
 				logger: this.logger,
 				jobsDef,
-				secret: this.config.secret
+				clients: this.config.reporters
 			});
 		}
 

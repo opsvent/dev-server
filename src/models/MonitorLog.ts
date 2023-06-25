@@ -10,6 +10,9 @@ class MonitorLog {
 	@Column()
 	monitorId!: number;
 
+	@Column('varchar', { length: 255 })
+	reporterNode!: string;
+
 	@Column()
 	timestamp!: Date;
 

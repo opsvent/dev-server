@@ -9,7 +9,7 @@ export interface ServerConfig {
 
 export interface ApiConfig {
 	readonly port: number;
-	readonly secret: string;
+	readonly reporters: Record<string, string>;
 }
 
 class Config {
@@ -26,7 +26,23 @@ class Config {
 
 		this._api = {
 			port: env.get('OVDS_PORT').default(9000).asPortNumber(),
-			secret: env.get('OVDS_SECRET').required().asString()
+			reporters: _.fromPairs(
+				_.times(
+					env.get('OVDS_REPORTERS').required().asIntPositive(),
+					i => {
+						return [
+							env
+								.get(`OVDS_REPORTER_${i + 1}_ID`)
+								.required()
+								.asString(),
+							env
+								.get(`OVDS_REPORTER_${i + 1}_SECRET`)
+								.required()
+								.asString()
+						];
+					}
+				)
+			)
 		};
 	}
 

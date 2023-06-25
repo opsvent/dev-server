@@ -19,11 +19,18 @@ const ReportBodySchema = Type.Object({
 const ReporterRoute: Route = async (fastify, ctx) => {
 	const nonceValidator = new NonceValidator(600); // 10 minute window
 
-	const checkAuth = (req: FastifyRequest) => {
+	const checkAuth = (req: FastifyRequest): string => {
 		try {
 			const sig = req.headers.authorization;
 			if (!sig) {
 				throw new Error('Authorization header missing');
+			}
+
+			const client = hmac.getKeyIdFromSignature(sig);
+			const clientSecret = ctx.clients[client];
+
+			if (!clientSecret) {
+				throw new Error('Unknown client: ' + client);
 			}
 
 			const nonce = hmac.verify(
@@ -35,12 +42,14 @@ const ReporterRoute: Route = async (fastify, ctx) => {
 					timeWindow: 600
 				},
 				{
-					id: 'DEV_KID',
-					key: ctx.secret
+					id: client,
+					key: clientSecret
 				}
 			);
 
 			nonceValidator.validate(nonce);
+
+			return client;
 		} catch (e) {
 			ctx.logger.info('Unauthorized request', {
 				reason: (e as any)?.message
@@ -71,18 +80,23 @@ const ReporterRoute: Route = async (fastify, ctx) => {
 	});
 
 	// get last statuses
-	const monitorStatus: Map<number, MonitorStatus> = new Map();
+	const monitorStatus: Map<string, MonitorStatus> = new Map();
 	for (const job of ctx.jobsDef.jobs) {
-		const lastEntry = await ctx.db.conn.getRepository(MonitorLog).findOne({
-			where: {
-				monitorId: job.id
-			},
-			order: {
-				timestamp: 'DESC'
+		for (const reporter of Object.keys(ctx.clients)) {
+			const lastEntry = await ctx.db.conn
+				.getRepository(MonitorLog)
+				.findOne({
+					where: {
+						monitorId: job.id,
+						reporterNode: reporter
+					},
+					order: {
+						timestamp: 'DESC'
+					}
+				});
+			if (lastEntry) {
+				monitorStatus.set(`${reporter}:${job.id}`, lastEntry.toStatus);
 			}
-		});
-		if (lastEntry) {
-			monitorStatus.set(job.id, lastEntry.toStatus);
 		}
 	}
 
@@ -91,35 +105,39 @@ const ReporterRoute: Route = async (fastify, ctx) => {
 		{ schema: { body: ReportBodySchema } },
 		async req => {
 			ctx.logger.info('Request to /reporter/report');
-			checkAuth(req);
+			const client = checkAuth(req);
 
 			if (req.body.generation !== ctx.jobsDef.generation) {
 				throw new BadRequest('Invalid generation');
 			}
 
+			const cacheKey = `${req.body.monitor}:${client}`;
 			const reported = req.body.ok
 				? MonitorStatus.UP
 				: MonitorStatus.DOWN;
-			if (monitorStatus.get(req.body.monitor) != reported) {
+			if (monitorStatus.get(cacheKey) != reported) {
 				ctx.logger.debug('Updating monitor status', {
 					monitor: req.body.monitor,
-					from: monitorStatus.get(req.body.monitor),
+					instance: client,
+					from: monitorStatus.get(cacheKey),
 					to: reported
 				});
 
 				const log = new MonitorLog();
 				log.monitorId = req.body.monitor;
+				log.reporterNode = client;
 				log.timestamp = new Date();
 				log.fromStatus =
-					monitorStatus.get(req.body.monitor) ?? MonitorStatus.DOWN;
+					monitorStatus.get(cacheKey) ?? MonitorStatus.DOWN;
 				log.toStatus = reported;
 				log.description = req.body.message ?? '';
 
 				await ctx.db.conn.getRepository(MonitorLog).save(log);
-				monitorStatus.set(req.body.monitor, reported);
+				monitorStatus.set(cacheKey, reported);
 			} else {
 				ctx.logger.debug('Got same reported value', {
-					monitor: req.body.monitor
+					monitor: req.body.monitor,
+					instance: client
 				});
 			}
 

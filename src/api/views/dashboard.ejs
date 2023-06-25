@@ -25,6 +25,7 @@ function getCellColor(uptime) {
 				--light: #878b90;
 				--medium: #a4a9b0;
 				--ok: #93D976;
+				--partial: #FFA600;
 				--err: #DD4949;
 			}
 
@@ -93,6 +94,7 @@ function getCellColor(uptime) {
 				background: var(--medium);
 				border-radius: 4px;
 				padding: 16px;
+				padding-bottom: 0;
 			}
 			.monitor .title {
 				display: flex;
@@ -125,8 +127,22 @@ function getCellColor(uptime) {
 			.monitor .status.up {
 				background: var(--ok);
 			}
+			.monitor .status.partial {
+				background: var(--partial);
+			}
 			.monitor .status.down {
 				background: var(--err);
+			}
+			.instance {
+				margin-bottom: 32px;
+			}
+			.instance .instanceHeader {
+				display: flex;
+				align-items: center;
+			}
+			.instance .status {
+				width: 14px;
+				height: 14px;
 			}
 			.fail {
 				color: var(--err);
@@ -196,27 +212,38 @@ function getCellColor(uptime) {
 				<% for (const monitor of monitors) { %>
 					<div class="monitor">
 						<div class="title">
-							<div class="status <%= monitor.up ? "up" : "down" %>"></div>
+							<div class="status <%= monitor.status %>"></div>
 							<h3><%= monitor.name %></h3>
 							<div class="tag">&#x1F551; <%= monitor.frequency %>s</div>
 							<div class="tag"><%= monitor.type %></div>
 						</div>
-						<p class="label">Last 24 hours</p>
-						<div class="history">
-							<% for (const p of monitor.last24Hours) { %>
-								<div class="cell <%= getCellColor(p.uptime) %>" title="<%= p.label %>"></div>
-							<% } %>
-						</div>
-						<p class="label">Last 60 days</p>
-						<div class="history">
-							<% for (const p of monitor.last60Days) { %>
-								<div class="cell <%= getCellColor(p.uptime) %>" title="<%= p.label %>"></div>
-							<% } %>
-						</div>
-						<br/>
-						<p><%= monitor.description %></p>
-						<% if(!monitor.up) { %>
-							<p><span class="fail">Error:</span> <%= monitor.current?.description || 'unknown' %></p>
+						<% if (monitor.description) { %>
+							<p><%= monitor.description %></p>
+							<br/>
+						<% } %>
+						<% for (const instanceStatus of monitor.byInstance) { %>
+							<div class="instance">
+								<div class="instanceHeader">
+									<div class="status <%= instanceStatus.up ? 'up' : 'down' %>"></div>
+									<p><%= instanceStatus.instance %></p>
+								</div>
+								<p class="label">Last 24 hours</p>
+								<div class="history">
+									<% for (const p of instanceStatus.last24Hours) { %>
+										<div class="cell <%= getCellColor(p.uptime) %>" title="<%= p.label %>"></div>
+									<% } %>
+								</div>
+								<p class="label">Last 60 days</p>
+								<div class="history">
+									<% for (const p of instanceStatus.last60Days) { %>
+										<div class="cell <%= getCellColor(p.uptime) %>" title="<%= p.label %>"></div>
+									<% } %>
+								</div>
+								<% if (!instanceStatus.up) { %>
+									<br/>
+									<p><span class="fail">Error:</span> <%= instanceStatus.message || 'unknown' %></p>
+								<% } %>
+							</div>
 						<% } %>
 					</div>
 				<% } %>
