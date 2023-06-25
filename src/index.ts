@@ -1,3 +1,5 @@
+import fs from 'fs';
+
 import Winston from 'winston';
 
 import Api from './api';
@@ -35,6 +37,7 @@ const logger = Winston.createLogger({
 const config = new Config();
 const db = new Db(config.server.databaseFile, logger.child({ group: 'db' }));
 const api = new Api(config.api, logger.child({ group: 'api' }), db);
+let configWatcher: fs.FSWatcher | null = null;
 
 const main = async () => {
 	logger.info('OpsVent Dev-Server starting up', {
@@ -58,6 +61,14 @@ const main = async () => {
 		count: jobDefs.jobs.length
 	});
 
+	logger.info('Start watching for changes in configuration file');
+	configWatcher = fs.watch(config.server.jobsDefinitionFile, {}, async () => {
+		logger.info('Configuration file changed. Reloading file');
+		const newJobDefs = await loadJobDefs(config.server.jobsDefinitionFile);
+		jobDefs.generation = newJobDefs.generation;
+		jobDefs.jobs = newJobDefs.jobs;
+	});
+
 	try {
 		await db.connect();
 		await api.start(jobDefs);
@@ -70,6 +81,7 @@ const main = async () => {
 
 const exit = async () => {
 	logger.info('Shutting down');
+	configWatcher?.close();
 	await db.close().catch(() => {});
 	await api.close().catch(() => {});
 	logger.info('Bye!');
